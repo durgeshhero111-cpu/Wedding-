@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin – Shadi Invites</title>
+<style>
+body{margin:0;background:#12090c;color:#f4e9d6;font:15px/1.5 system-ui,sans-serif;padding:16px;max-width:900px;margin:auto}
+h1{font-size:22px;color:#d4af6a;margin:0 0 12px}h2{font-size:16px;color:#d4af6a;margin:26px 0 8px}
+input,textarea{width:100%;background:#1f1015;color:#f4e9d6;border:1px solid #d4af6a66;border-radius:8px;padding:10px;font:inherit}textarea{min-height:90px}
+.b{padding:8px 14px;border-radius:8px;border:1px solid #d4af6a;background:transparent;color:#d4af6a;font:600 14px system-ui;margin:3px 3px 3px 0;cursor:pointer}
+.b.on,.b.f{background:#d4af6a;color:#12090c}.b.wa{background:#25d366;border-color:#25d366;color:#04210f}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.c{background:#1f1015;border:1px solid #d4af6a40;border-radius:10px;padding:12px}.c b{display:block;font-size:24px;color:#f6e4b0}.c small{opacity:.6}
+.row{display:flex;gap:8px;align-items:center;border-bottom:1px solid #ffffff18;padding:10px 0;flex-wrap:wrap}
+.row .i{flex:1;min-width:180px}.row small{display:block;opacity:.65}
+.tag{font-size:12px;padding:2px 8px;border-radius:20px;background:#ffffff18;margin-right:4px}.ok{background:#1d5e36}.no{background:#6b2020}
+a{color:#d4af6a}
+</style></head><body>
+<div id="login" hidden><h1>Admin login</h1><input id="pw" type="password" placeholder="Password"><button class="b f" id="go" style="margin-top:8px">Log in</button></div>
+<div id="app" hidden>
+<h1>Invitation dashboard</h1>
+<div class="grid" id="stats"></div>
+<h2>Template</h2><div id="themes"></div>
+<h2>WhatsApp message <small style="opacity:.6">– use {name} and {link}</small></h2>
+<textarea id="msg"></textarea><button class="b" id="saveMsg">Save message</button>
+<h2>Add guests <small style="opacity:.6">– one per line: Name, Mobile, Address</small></h2>
+<textarea id="bulk" placeholder="Ramesh Sharma, 9876543210, Patna"></textarea><button class="b f" id="add">Add guests</button>
+<h2>Guests</h2>
+<div id="filters"></div>
+<button class="b wa" id="next">Send to next unsent</button><button class="b" id="csv">Download CSV</button>
+<div id="list"></div>
+<p style="opacity:.6;margin-top:30px" id="musicNote"></p>
+</div>
+<script>
+const $=i=>document.getElementById(i);let D,F="all";
+const E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const api=(u,m="GET",b)=>fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(r=>r.status===401?Promise.reject("auth"):r.json());
+async function load(){try{D=await api("/api/admin/data")}catch(e){$("login").hidden=false;$("app").hidden=true;return}
+ $("login").hidden=true;$("app").hidden=false;if(!$("msg").dataset.i){$("msg").value=D.msg;$("msg").dataset.i=1}render()}
+$("go").onclick=async()=>{const r=await fetch("/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("pw").value})});r.ok?load():alert("Wrong password")};
+const link=g=>location.origin+"/i/"+g.code;
+const wa=g=>"https://wa.me/"+g.mobile+"?text="+encodeURIComponent($("msg").value.replace(/\{name\}/g,g.name).replace(/\{link\}/g,link(g)));
+const pct=(a,b)=>b?Math.round(a*100/b)+"%":"–";
+const FILT={all:"All",unsent:"Not sent",unseen:"Sent, not seen",noreply:"Seen, no reply",yes:"Confirmed",no:"Declined"};
+function render(){const s=D.stats;
+ $("stats").innerHTML=[["Guests",s.total,""],["Cards sent",s.sent,pct(s.sent,s.total)],["Saw the link",s.seen,pct(s.seen,s.sent)+" of sent"],["Opened card",s.opened,pct(s.opened,s.sent)+" of sent"],["Confirmed",s.yes,s.people+" people"],["Declined",s.no,""],["No reply",s.pending,""]]
+  .map(x=>`<div class=c><b>${x[1]}</b>${x[0]}<br><small>${x[2]}&nbsp;</small></div>`).join("");
+ $("themes").innerHTML=D.themes.map(t=>`<button class="b ${t===D.theme?"on":""}" data-t="${t}">${t}</button><a href="/?theme=${t}" target="_blank" style="margin-right:12px">preview</a>`).join("");
+ $("filters").innerHTML=Object.entries(FILT).map(([k,v])=>`<button class="b ${F===k?"on":""}" data-f="${k}">${v}</button>`).join("");
+ const L=D.guests.filter(g=>F==="all"||(F==="unsent"&&!g.sent)||(F==="unseen"&&g.sent&&!g.views)||(F==="noreply"&&g.views&&!g.rsvp)||F===g.rsvp);
+ $("list").innerHTML=L.length?L.map(g=>`<div class=row><div class=i><b>${E(g.name)}</b><small>${E(g.mobile)} · ${E(g.address)}</small>
+  <span class="tag ${g.sent?"ok":""}">${g.sent?"Sent":"Not sent"}</span><span class=tag>👁 ${g.views}${g.lastView?" · "+new Date(g.lastView).toLocaleString():""}</span>${g.opened?'<span class="tag ok">Opened</span>':""}${g.rsvp?`<span class="tag ${g.rsvp==="yes"?"ok":"no"}">${g.rsvp==="yes"?"Coming ("+g.count+")":"Declined"}</span>`:""}</div>
+  <button class="b wa" data-s="${g._id}">${g.sent?"Resend":"Send"}</button><button class="b" data-c="${g._id}">Copy link</button><button class="b" data-d="${g._id}">✕</button></div>`).join(""):"<p>No guests here yet.</p>";
+ $("musicNote").textContent=D.music?"Music: playing public/music file on open.":"No music yet: add public/music.mp4 and redeploy.";
+}
+async function send(id){const g=D.guests.find(x=>x._id===id);window.open(wa(g),"_blank");await api("/api/admin/guests/"+id+"/sent","POST");load()}
+document.addEventListener("click",async e=>{const t=e.target.dataset;if(!t)return;
+ if(t.t){await api("/api/admin/settings","POST",{theme:t.t});load()}
+ if(t.f){F=t.f;render()}
+ if(t.s)send(t.s);
+ if(t.c){const g=D.guests.find(x=>x._id===t.c);navigator.clipboard.writeText(link(g));e.target.textContent="Copied"}
+ if(t.d&&confirm("Delete this guest?")){await api("/api/admin/guests/"+t.d,"DELETE");load()}});
+$("add").onclick=async()=>{const r=await api("/api/admin/guests","POST",{text:$("bulk").value});$("bulk").value="";alert(r.added+" guests added");load()};
+$("saveMsg").onclick=async()=>{await api("/api/admin/settings","POST",{msg:$("msg").value});alert("Message saved")};
+$("next").onclick=()=>{const g=D.guests.slice().reverse().find(x=>!x.sent);g?send(g._id):alert("Everyone has been sent a card")};
+$("csv").onclick=()=>{const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+ const rows=[["Name","Mobile","Address","Link","Sent","Views","Opened","RSVP","People"],...D.guests.map(g=>[g.name,g.mobile,g.address,link(g),g.sent?"yes":"",g.views,g.opened?"yes":"",g.rsvp,g.count])];
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+rows.map(r=>r.map(q).join(",")).join("\n")],{type:"text/csv"}));a.download="guests.csv";a.click()};
+load();
+</script></body></html>

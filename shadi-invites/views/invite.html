@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hi" data-theme="{{THEME}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>शुभ विवाह – स्नेहा &amp; रवि</title>
+<meta property="og:title" content="शुभ विवाह – स्नेहा &amp; रवि">
+<meta property="og:description" content="{{GUEST}}, आपको सपरिवार सादर आमंत्रण">
+<link href="https://fonts.googleapis.com/css2?family=Amita:wght@400;700&family=Noto+Serif+Devanagari:wght@400;600&family=Rozha+One&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<link href="/invite.css" rel="stylesheet">
+</head>
+<body>
+<div class="dust" id="dust"></div>
+<button id="mute" aria-label="संगीत">♪</button>
+<audio id="bgm" loop preload="auto"></audio>
+
+<div id="gate">
+  <div class="door l"></div><div class="door r"></div>
+  <div class="gc"><svg id="mandala" viewBox="-100 -100 200 200" fill="none" stroke="var(--gold)" stroke-width=".6"></svg><div class="mono foil">ॐ</div></div>
+  <div class="sec foil gc" style="margin:16px 0 0">शुभ विवाह</div>
+  <div class="cn foil gc">स्नेहा <span style="color:var(--gold)">&amp;</span> रवि</div>
+  <div class="gc lbl" style="margin-top:14px">आपको सादर आमंत्रित करते हैं</div>
+  <div class="gname gc foil">{{GUEST}}</div>
+  <button class="btn fill gc" id="openBtn">निमंत्रण खोलें</button>
+</div>
+
+<main>
+<section class="rv"><div class="frame"><div>
+  <div class="lbl">॥ श्री गणेशाय नमः ॥</div>
+  <p class="par" style="font-size:17px">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।<br>निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥</p>
+  <svg class="orn" viewBox="0 0 180 14"><path d="M0 7h70M110 7h70" stroke="var(--gold)" stroke-width=".8"/><path d="M90 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>
+  <p class="par" style="font-size:17px">मान्यवर,<br>परमपिता परमेश्वर की असीम अनुकम्पा से</p>
+  <div class="lbl" style="margin-top:22px">आयुष्मती</div>
+  <div class="nm foil">स्नेहा कुमारी</div>
+  <p class="par">सुपुत्री: श्रीमती रीता देवी एवं स्वर्गीय नरेन्द्र कुमार उर्फ मेहमान जी<br>निवासी: बनबैरिया, पोस्ट जमुनिया, थाना सहोदरा, चम्पारण</p>
+  <div class="lbl" style="margin:18px 0">❦ परिणय सूत्र में ❦</div>
+  <div class="lbl">चिरंजीव</div>
+  <div class="nm foil">रवि कुमार सिंह</div>
+  <p class="par">सुपुत्र: श्रीमती शोभा देवी एवं स्वर्गीय शिवजी सिंह<br>निवासी: रंगललही, पोस्ट मधुबनी, थाना धनहा, चम्पारण</p>
+  <svg class="orn" viewBox="0 0 180 14"><path d="M0 7h70M110 7h70" stroke="var(--gold)" stroke-width=".8"/><path d="M90 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>
+  <p class="par" style="font-size:17px">के पावन परिणयोत्सव की मधुर बेला पर अपने आशीर्वाद की मृदुल ज्योत्सना से नवदम्पति के भावी जीवन को ज्योतिर्मय कर हमें अनुगृहीत करें।</p>
+</div></div></section>
+
+<section class="rv"><div class="sec foil">शुभ विवाह में शेष समय</div><div class="cd" id="cd"></div></section>
+
+<section class="rv">
+  <div class="sec foil">वैवाहिक कार्यक्रम</div>
+  <div class="evc"><div class="dt"><b>24</b><span>नवम्बर 2026</span><em>मंगलवार</em></div><div class="ed"><h3>हनुमान अराधना<br>हल्दी एवं मेहंदी</h3></div></div>
+  <div class="evc"><div class="dt"><b>25</b><span>नवम्बर 2026</span><em>बुधवार</em></div><div class="ed"><h3>बारात आगमन<br>प्रीतिभोज एवं शुभ विवाह</h3><p>संध्या 7 बजे से</p></div></div>
+</section>
+
+<section class="rv">
+  <div class="sec foil">कार्यक्रम स्थल</div>
+  <p style="font-size:21px;margin:0">हमारा निवास स्थान</p>
+  <p class="par">बनबैरिया, पोस्ट जमुनिया, थाना सहोदरा, चम्पारण</p>
+  <p class="par" style="margin-bottom:18px">समस्त वैवाहिक कार्यक्रम निवास स्थान बनबैरिया से सम्पन्न होगा।</p>
+  <a class="btn" href="{{MAP}}" target="_blank" rel="noopener">स्थान देखें</a>
+</section>
+
+<section class="rv" id="rsvpbox">
+  <div class="sec foil">आपकी उपस्थिति</div>
+  <p class="par">कृपया अपनी स्वीकृति दें — कुल कितने सदस्य आएंगे?</p>
+  <div class="stp"><button id="m" aria-label="कम">−</button><b id="n">2</b><button id="p" aria-label="अधिक">+</button></div>
+  <button class="btn fill" data-r="yes">सहर्ष उपस्थित होंगे</button>
+  <button class="btn" data-r="no">क्षमा, नहीं आ पाएंगे</button>
+  <p class="par" id="rmsg" style="min-height:2em"></p>
+</section>
+
+<section class="rv" style="padding-bottom:110px">
+  <svg class="orn" viewBox="0 0 180 14"><path d="M0 7h70M110 7h70" stroke="var(--gold)" stroke-width=".8"/><path d="M90 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>
+  <div class="sec foil">दर्शनाभिलाषी</div>
+  <p class="par" style="font-size:18px">मृत्युंजय कुमार मिश्रा<br>सिद्धार्थ कुमार मिश्रा<br>आदित्य मिश्रा<br>सतीश मिश्रा<br>विनोद मिश्रा<br>एवं समस्त मिश्रा परिवार</p>
+  <div class="lbl" style="margin-top:22px">आकांक्षी</div>
+  <p class="par" style="font-size:18px">जगदीश मिश्रा</p>
+  <p class="par" style="margin-top:20px">सम्पर्क<br><a class="tel" href="tel:+918887821426">8887821426</a> · <a class="tel" href="tel:+916394584695">6394584695</a></p>
+</section>
+</main>
+
+<script>
+var B={{BOOT}},$=function(i){return document.getElementById(i)};
+var s="",i;for(var r=94;r>30;r-=16)s+='<circle r="'+r+'"/>';
+for(i=0;i<24;i++)s+='<ellipse cx="0" cy="-70" rx="7" ry="22" transform="rotate('+i*15+')"/>';
+for(i=0;i<12;i++)s+='<ellipse cx="0" cy="-42" rx="5" ry="13" transform="rotate('+(i*30+15)+')"/>';
+$("mandala").innerHTML=s;
+var a=$("bgm");if(B.music)a.src=B.music;
+$("openBtn").onclick=function(){
+  if(B.music){a.play().catch(function(){});$("mute").style.display="block"}
+  $("gate").classList.add("open");
+  setTimeout(function(){$("gate").classList.add("done")},1900);
+  setTimeout(function(){document.querySelector(".rv").classList.add("on")},700);
+  if(B.code)fetch("/api/open/"+B.code,{method:"POST"}).catch(function(){});
+};
+$("mute").onclick=function(){if(a.paused){a.play();this.textContent="♪"}else{a.pause();this.textContent="✕"}};
+function tick(){var t=Math.max(0,(new Date(B.date)-new Date())/1000),
+ v=[["दिन",t/86400],["घंटे",t%86400/3600],["मिनट",t%3600/60],["सेकंड",t%60]];
+ $("cd").innerHTML=v.map(function(x){return"<div><b>"+("0"+Math.floor(x[1])).slice(-2)+"</b>"+x[0]+"</div>"}).join("")}
+tick();setInterval(tick,1000);
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add("on")})},{threshold:.15});
+document.querySelectorAll(".rv").forEach(function(e){io.observe(e)});
+for(i=0;i<24;i++){var d=document.createElement("i");d.style.cssText="left:"+Math.random()*100+"%;animation-duration:"+(9+Math.random()*10)+"s;animation-delay:"+(-Math.random()*15)+"s";$("dust").appendChild(d)}
+var n=B.count||2,rs=B.rsvp;if(!B.code)$("rsvpbox").style.display="none";
+function show(){$("n").textContent=n;$("rmsg").textContent=rs==="yes"?"धन्यवाद! आपकी उपस्थिति दर्ज हो गई ("+n+" सदस्य)।":rs==="no"?"आपका उत्तर दर्ज हो गया। आपकी कमी खलेगी।":""}
+$("m").onclick=function(){n=Math.max(1,n-1);show()};$("p").onclick=function(){n=Math.min(20,n+1);show()};
+document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){rs=this.dataset.r;
+ fetch("/api/rsvp/"+B.code,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rsvp:rs,count:n})}).then(show)}});
+show();
+</script>
+</body>
+</html>
