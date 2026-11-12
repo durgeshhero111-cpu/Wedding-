@@ -24,15 +24,16 @@ const auth = (q, s, n) => isAdmin(q) ? n() : s.status(401).json({ error: "login"
 const tpl = fs.readFileSync(path.join(__dirname, "views/invite.html"), "utf8");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const music = () => ["music.mp4", "music.mp3", "music.m4a"].find(f => fs.existsSync(path.join(__dirname, "public", f)));
-function page(res, g, theme) {
+function page(q, res, g, theme) {
+  const T = W.templates.find(t => t.id === theme) || W.templates[0], base = q.protocol + "://" + q.get("host");
   const boot = { code: g?.code || "", rsvp: g?.rsvp || "", count: g?.count || 2, music: music() ? "/" + music() : "", date: W.date };
   res.type("html").send(tpl
-    .replaceAll("{{THEME}}", () => theme).replaceAll("{{GUEST}}", () => esc(g?.name || "आदरणीय परिवार"))
+    .replaceAll("{{THEME}}", () => T.id).replaceAll("{{LAYOUT}}", () => T.layout).replaceAll("{{BASE}}", () => base).replaceAll("{{PATH}}", () => esc(q.originalUrl.split("?")[0])).replaceAll("{{GUEST}}", () => esc(g?.name || "आदरणीय परिवार"))
     .replaceAll("{{MAP}}", () => W.map).replace("{{BOOT}}", () => JSON.stringify(boot).replace(/</g, "\\u003c")));
 }
 const crawler = /bot|crawl|spider|preview|whatsapp|facebookexternalhit|telegram|slack/i;
 app.get("/health", (q, s) => s.send("ok"));
-app.get("/", async (q, s) => page(s, null, W.themes.includes(q.query.theme) ? q.query.theme : await get("theme", W.theme)));
+app.get("/", async (q, s) => page(q, s, null, W.themes.includes(q.query.theme) ? q.query.theme : await get("theme", W.theme)));
 app.get("/i/:code", async (q, s) => {
   const g = await Guest.findOne({ code: q.params.code });
   if (!g) return s.status(404).send("Invitation not found");
@@ -40,7 +41,7 @@ app.get("/i/:code", async (q, s) => {
     const set = { lastView: new Date() }; if (!g.firstView) set.firstView = set.lastView;
     await Guest.updateOne({ _id: g._id }, { $inc: { views: 1 }, $set: set });
   }
-  page(s, g, await get("theme", W.theme));
+  page(q, s, g, await get("theme", W.theme));
 });
 app.post("/api/open/:code", async (q, s) => {
   if (!isAdmin(q)) await Guest.updateOne({ code: q.params.code }, { $set: { opened: true } });
@@ -64,7 +65,7 @@ app.get("/admin", (q, s) => s.sendFile(path.join(__dirname, "views/admin.html"))
 app.use("/api/admin", auth);
 app.get("/api/admin/data", async (q, s) => {
   const guests = await Guest.find().sort({ createdAt: -1 }).lean(), n = f => guests.filter(f).length;
-  s.json({ guests, themes: W.themes, theme: await get("theme", W.theme), msg: await get("msg", W.msg), music: !!music(),
+  s.json({ guests, themes: W.themes, templates: W.templates, theme: await get("theme", W.theme), msg: await get("msg", W.msg), music: !!music(),
     stats: { total: guests.length, sent: n(g => g.sent), seen: n(g => g.views > 0), opened: n(g => g.opened),
       yes: n(g => g.rsvp === "yes"), no: n(g => g.rsvp === "no"), pending: n(g => !g.rsvp),
       people: guests.reduce((a, g) => a + (g.rsvp === "yes" ? g.count : 0), 0) } });

@@ -43,7 +43,7 @@ const FILT={all:"All",unsent:"Not sent",unseen:"Sent, not seen",noreply:"Seen, n
 function render(){const s=D.stats;
  $("stats").innerHTML=[["Guests",s.total,""],["Cards sent",s.sent,pct(s.sent,s.total)],["Saw the link",s.seen,pct(s.seen,s.sent)+" of sent"],["Opened card",s.opened,pct(s.opened,s.sent)+" of sent"],["Confirmed",s.yes,s.people+" people"],["Declined",s.no,""],["No reply",s.pending,""]]
   .map(x=>`<div class=c><b>${x[1]}</b>${x[0]}<br><small>${x[2]}&nbsp;</small></div>`).join("");
- $("themes").innerHTML=D.themes.map(t=>`<button class="b ${t===D.theme?"on":""}" data-t="${t}">${t}</button><a href="/?theme=${t}" target="_blank" style="margin-right:12px">preview</a>`).join("");
+ $("themes").innerHTML=D.templates.map(t=>`<div class=row><div class=i><b>${E(t.name)}</b></div><button class="b ${t.id===D.theme?"on":""}" data-t="${t.id}">${t.id===D.theme?"Selected":"Use this"}</button><a href="/?theme=${t.id}" target="_blank">Preview</a></div>`).join("");
  $("filters").innerHTML=Object.entries(FILT).map(([k,v])=>`<button class="b ${F===k?"on":""}" data-f="${k}">${v}</button>`).join("");
  const L=D.guests.filter(g=>F==="all"||(F==="unsent"&&!g.sent)||(F==="unseen"&&g.sent&&!g.views)||(F==="noreply"&&g.views&&!g.rsvp)||F===g.rsvp);
  $("list").innerHTML=L.length?L.map(g=>`<div class=row><div class=i><b>${E(g.name)}</b><small>${E(g.mobile)} · ${E(g.address)}</small>
