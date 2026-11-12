@@ -20,6 +20,7 @@
 <meta name="theme-color" content="#3b0a18">
 <link href="https://fonts.googleapis.com/css2?family=Amita:wght@400;700&family=Noto+Serif+Devanagari:wght@400;600&family=Rozha+One&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <link href="/invite.css" rel="stylesheet">
+<link href="/extra.css" rel="stylesheet">
 </head>
 <body>
 <div class="dust" id="dust"></div>
@@ -38,8 +39,8 @@
 
 <main>
 <section class="rv"><div class="frame"><div>
-  <div class="lbl">॥ श्री गणेशाय नमः ॥</div>
-  <p class="par" style="font-size:17px">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।<br>निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥</p>
+  <div class="lbl">{{BL}}</div>
+  <p class="par" style="font-size:17px">{{SH}}</p>
   <svg class="orn" viewBox="0 0 180 14"><path d="M0 7h70M110 7h70" stroke="var(--gold)" stroke-width=".8"/><path d="M90 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>
   <p class="par" style="font-size:17px">मान्यवर,<br>परमपिता परमेश्वर की असीम अनुकम्पा से</p>
   <div class="lbl" style="margin-top:22px">आयुष्मती</div>
@@ -61,12 +62,16 @@
   <div class="evc"><div class="dt"><b>25</b><span>नवम्बर 2026</span><em>बुधवार</em></div><div class="ed"><h3>बारात आगमन<br>प्रीतिभोज एवं शुभ विवाह</h3><p>संध्या 7 बजे से</p></div></div>
 </section>
 
-<section class="rv">
+<section class="rv" id="venue">
   <div class="sec foil">कार्यक्रम स्थल</div>
+  <div class="map"><svg viewBox="0 0 300 130"><path class="route" d="M14 112 C70 20 120 124 180 76 S250 40 262 44"/><circle cx="14" cy="112" r="4" fill="var(--gold)"/></svg><div class="car">🐎</div><div class="pin">📍</div></div>
   <p style="font-size:21px;margin:0">हमारा निवास स्थान</p>
-  <p class="par">बनबैरिया, पोस्ट जमुनिया, थाना सहोदरा, चम्पारण</p>
+  <div class="addr"><div><i>ग्राम</i>बनबैरिया</div><div><i>पोस्ट</i>जमुनिया</div><div><i>थाना</i>सहोदरा</div><div><i>जिला</i>चम्पारण, बिहार</div></div>
+  <div class="chips"><span>🗓 24 नवम्बर – हल्दी · मेहंदी</span><span>🎺 25 नवम्बर – बारात संध्या 7 बजे</span></div>
   <p class="par" style="margin-bottom:18px">समस्त वैवाहिक कार्यक्रम निवास स्थान बनबैरिया से सम्पन्न होगा।</p>
-  <a class="btn" href="{{MAP}}" target="_blank" rel="noopener">स्थान देखें</a>
+  <a class="btn fill" href="{{MAP}}" target="_blank" rel="noopener">📍 Google Maps पर खोलें</a>
+  <button class="btn" id="cp">पता कॉपी करें</button>
+  <button class="btn" id="shr" data-u="{{MAP}}">स्थान साझा करें</button>
 </section>
 
 <section class="rv" id="rsvpbox">
@@ -80,6 +85,7 @@
 
 <section class="rv" style="padding-bottom:110px">
   <svg class="orn" viewBox="0 0 180 14"><path d="M0 7h70M110 7h70" stroke="var(--gold)" stroke-width=".8"/><path d="M90 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>
+  <p class="par wish" style="font-size:18px">{{WISH}}</p>
   <div class="sec foil">दर्शनाभिलाषी</div>
   <p class="par" style="font-size:18px">मृत्युंजय कुमार मिश्रा<br>सिद्धार्थ कुमार मिश्रा<br>आदित्य मिश्रा<br>सतीश मिश्रा<br>विनोद मिश्रा<br>एवं समस्त मिश्रा परिवार</p>
   <div class="lbl" style="margin-top:22px">आकांक्षी</div>
@@ -117,5 +123,6 @@ document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){r
  fetch("/api/rsvp/"+B.code,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rsvp:rs,count:n})}).then(show)}});
 show();
 </script>
+<script src="/fx.js" defer></script>
 </body>
 </html>

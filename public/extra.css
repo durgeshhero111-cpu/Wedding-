@@ -1,0 +1,76 @@
+[data-theme=petal]{--ink:#fff0f3;--w1:#ffd3de;--w2:#ffe4ea;--g0:#b03a5b;--gold:#c2506e;--g2:#8c1f40;--tx:#4a1527;--bt:#fff0f3}
+[data-theme=diya]{--ink:#1a0600;--w1:#7a2a05;--w2:#4a1802;--g0:#e08a00;--gold:#ffc23d;--g2:#fff0b3;--tx:#fff1d6;--bt:#1a0600}
+[data-theme=mor]{--ink:#021a1d;--w1:#0a5a5f;--w2:#063f46;--g0:#b98a1f;--gold:#e6c35c;--g2:#fff0b8;--tx:#e8fbf7;--bt:#021a1d}
+[data-theme=star]{--ink:#03030f;--w1:#1a1d5e;--w2:#0b0d33;--g0:#8f9bd6;--gold:#cfd8ff;--g2:#fff;--tx:#eef0ff;--bt:#03030f}
+[data-theme=mehndi]{--ink:#f3ecd6;--w1:#e4d6ac;--w2:#ece0bd;--g0:#4d5c17;--gold:#5f6f1f;--g2:#3a4510;--tx:#3a2a12;--bt:#f3ecd6}
+[data-theme=sunrise]{--ink:#1a1033;--w1:#c2410c;--w2:#7c2d12;--g0:#f59e0b;--gold:#fcd34d;--g2:#fff7d6;--tx:#fff4e6;--bt:#1a1033}
+[data-theme=toran]{--ink:#2b1300;--w1:#b45309;--w2:#7c3a05;--g0:#f59e0b;--gold:#ffb703;--g2:#fff3b0;--tx:#fff7e0;--bt:#2b1300}
+[data-theme=mahal]{--ink:#f7f1e3;--w1:#ecdfc3;--w2:#f1e6cd;--g0:#8a6508;--gold:#a8770b;--g2:#5c3d05;--tx:#3a2410;--bt:#f7f1e3}
+[data-theme=rangoli]{--ink:#120a24;--w1:#3b1b6b;--w2:#26104a;--g0:#ff8a3d;--gold:#ff6fb1;--g2:#ffe27a;--tx:#fff;--bt:#120a24}
+[data-theme=neon]{--ink:#02040a;--w1:#0b1b3a;--w2:#07122a;--g0:#ff9f1c;--gold:#ffd166;--g2:#fff;--tx:#e8f0ff;--bt:#02040a}
+/* address card (all templates) */
+.map{position:relative;width:300px;max-width:100%;height:130px;margin:0 auto 18px;border:1px solid var(--gold);border-radius:14px;overflow:hidden;background:repeating-linear-gradient(0deg,#ffffff10 0 1px,transparent 1px 22px),repeating-linear-gradient(90deg,#ffffff10 0 1px,transparent 1px 22px)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:6 6;animation:march 1.2s linear infinite}@keyframes march{to{stroke-dashoffset:-24}}
+.pin{position:absolute;left:246px;top:4px;font-size:30px;animation:bob 2.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-8px)}}
+.pin::after{content:"";position:absolute;left:50%;bottom:-2px;width:10px;height:10px;margin-left:-5px;border-radius:50%;border:2px solid var(--gold);animation:rip 2.2s ease-out infinite}@keyframes rip{to{transform:scale(4);opacity:0}}
+.car{position:absolute;left:0;top:0;font-size:20px;offset-path:path("M14 112 C70 20 120 124 180 76 S250 40 262 44");offset-rotate:0deg;animation:go 7s ease-in-out infinite}@keyframes go{from{offset-distance:0}to{offset-distance:100%}}
+.addr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.addr div{border:1px solid color-mix(in srgb,var(--gold) 50%,transparent);padding:8px;font-size:17px;border-radius:8px}
+.addr i{display:block;font:700 12px var(--hd);color:var(--gold);font-style:normal}
+.chips{display:flex;flex-direction:column;gap:6px;align-items:center;margin:10px 0}.chips span{font-size:14px;padding:4px 14px;border-radius:30px;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--g2)}
+[data-layout] .rv.on{transform:none}
+.vine{display:block;width:200px;height:30px;margin:0 auto 10px}.vine path{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-dasharray:320;stroke-dashoffset:320}.on .vine path{animation:draw 3s .3s forwards}@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fall{to{transform:translateY(112vh) translateX(50px) rotate(400deg);opacity:.2}}
+@keyframes tw{from{opacity:.1}to{opacity:1}}
+/* petal: falling rose petals, soft leaf-cards */
+[data-layout=petal] section{max-width:500px;margin:26px auto;padding:56px 22px;border-radius:44px 8px 44px 8px;background:#ffffffb0;box-shadow:0 10px 40px #b03a5b33;border:1px solid var(--gold)}
+[data-layout=petal] .frame,[data-layout=petal] .frame>div{border:0;padding:0}[data-layout=petal] .rv{transform:scale(.9) rotate(-2deg)}
+[data-layout=petal] .dust i{top:-20px;bottom:auto;width:12px;height:16px;border-radius:80% 0;background:#f4a6b8;box-shadow:none;animation-name:fall}
+/* diya: flickering diya row + embers */
+[data-layout=diya] main{background:radial-gradient(ellipse at 50% 0,#9a3a06,var(--ink) 70%)}
+[data-layout=diya] section{max-width:500px;padding:76px 22px 40px;position:relative}
+[data-layout=diya] section::before{content:"🪔 🪔 🪔 🪔 🪔";position:absolute;top:22px;left:0;right:0;font-size:22px;letter-spacing:6px;filter:drop-shadow(0 0 10px #ffb703);animation:flick 1.6s ease-in-out infinite}
+@keyframes flick{0%,100%{opacity:1;transform:scale(1)}30%{opacity:.7;transform:scale(.97)}60%{opacity:1;transform:scale(1.05)}}
+[data-layout=diya] .frame,[data-layout=diya] .frame>div{border:0;padding:0}[data-layout=diya] .evc{border-radius:60px 60px 8px 8px;box-shadow:0 0 28px #ffb70333}
+/* mor: peacock-feather eyes glowing above each card */
+[data-layout=mor] section{max-width:500px;margin:56px auto 20px;padding:84px 22px 40px;border:1px solid var(--gold);border-radius:34px 4px 34px 4px;position:relative;background:linear-gradient(#ffffff14,#ffffff04)}
+[data-layout=mor] section::before{content:"";position:absolute;top:-34px;left:50%;margin-left:-34px;width:68px;height:68px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle,#0a2a6b 0 14%,#1fa08e 15% 34%,#0a2a6b 35% 44%,var(--gold) 45% 58%,#0a7a6b 59%);box-shadow:0 0 22px #3ed1c066;animation:eye 3s ease-in-out infinite}
+@keyframes eye{50%{transform:rotate(-45deg) scale(1.12);filter:hue-rotate(50deg)}}
+[data-layout=mor] .frame,[data-layout=mor] .frame>div{border:0;padding:0}
+/* star: twinkling sky, floating moon, shooting star */
+[data-layout=star] main{background:none}[data-layout=star] section{max-width:500px;padding:60px 24px}
+[data-layout=star] .rv{transform:translateY(40px);filter:blur(8px)}[data-layout=star] .rv.on{filter:none}
+[data-layout=star] .frame,[data-layout=star] .frame>div{border:0;padding:0}[data-layout=star] .frame{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:20px 0}
+[data-layout=star] .dust i{bottom:auto;animation:tw 2.5s ease-in-out infinite alternate}
+[data-layout=star] .dust::before{content:"";position:fixed;top:60px;left:16px;width:48px;height:48px;border-radius:50%;box-shadow:inset -14px -6px 0 0 #fff;filter:drop-shadow(0 0 14px #cfd8ff);animation:bob 6s ease-in-out infinite}
+[data-layout=star] .dust::after{content:"";position:fixed;top:20%;left:100%;width:140px;height:2px;background:linear-gradient(90deg,#fff,transparent);transform:rotate(-30deg);animation:shoot 6s 2s linear infinite}
+@keyframes shoot{0%{transform:translate(0) rotate(-30deg);opacity:1}30%,100%{transform:translate(-130vw,70vw) rotate(-30deg);opacity:0}}
+/* mehndi: marching-dash border + self-drawing henna vine */
+[data-layout=mehndi] section{max-width:500px;margin:24px auto;padding:56px 22px;border:2px dashed var(--gold);border-radius:30px;background:#ffffff55}
+[data-layout=mehndi] .frame,[data-layout=mehndi] .frame>div{border:0;padding:0}[data-layout=mehndi] .dust i{background:var(--gold);box-shadow:none}
+/* sunrise: rising sun + rotating rays behind glass cards */
+html[data-layout=sunrise],[data-layout=sunrise] body{background:linear-gradient(#1a1033,#7c2d12 55%,#f59e0b) fixed}
+[data-layout=sunrise] main{position:relative;z-index:2;background:none}[data-layout=sunrise] .dust{z-index:0}
+[data-layout=sunrise] section{max-width:500px;margin:24px auto;padding:52px 22px;background:#ffffff1c;backdrop-filter:blur(6px);border:1px solid #ffffff4d;border-radius:28px}
+[data-layout=sunrise] .frame,[data-layout=sunrise] .frame>div{border:0;padding:0}
+[data-layout=sunrise] .dust::before{content:"";position:fixed;left:50%;bottom:-170px;width:340px;height:340px;margin-left:-170px;border-radius:50%;background:repeating-conic-gradient(#fcd34d55 0 6deg,transparent 6deg 18deg);animation:spin 40s linear infinite}
+[data-layout=sunrise] .dust::after{content:"";position:fixed;left:50%;bottom:-70px;width:140px;height:140px;margin-left:-70px;border-radius:50%;background:radial-gradient(#fff7d6 35%,#fcd34d 65%);box-shadow:0 0 70px #fcd34d;animation:rise 6s ease-out both}@keyframes rise{from{transform:translateY(120px)}}
+/* toran: swinging marigold garland over hanging cards */
+[data-layout=toran] section{max-width:500px;margin:70px auto 20px;padding:60px 22px 36px;position:relative;border:1px solid var(--gold);border-radius:6px 6px 30px 30px;background:#00000030;transform-origin:50% -60px;animation:swing 5s ease-in-out infinite}
+[data-layout=toran] section::before{content:"🌼🏵️🌼🏵️🌼🏵️🌼🏵️🌼🏵️";position:absolute;top:-24px;left:-6px;right:-6px;font-size:22px;white-space:nowrap;overflow:hidden}
+@keyframes swing{0%,100%{transform:rotate(-.9deg)}50%{transform:rotate(.9deg)}}
+[data-layout=toran] .frame,[data-layout=toran] .frame>div{border:0;padding:0}[data-layout=toran] .dust i{top:-20px;bottom:auto;width:9px;height:9px;background:#ffb703;animation-name:fall}
+/* mahal: marble jharokha windows; shutters open on reveal */
+[data-layout=mahal] section{max-width:480px;margin:30px auto;padding:80px 22px 44px;border:2px solid var(--gold);border-radius:50% 50% 0 0/90px 90px 0 0;background:linear-gradient(var(--w1),var(--w2));box-shadow:inset 0 0 0 6px var(--ink),inset 0 0 0 7px var(--gold)}
+[data-layout=mahal] .rv{opacity:1;transform:none;clip-path:inset(0 50%);transition:clip-path 1.6s cubic-bezier(.7,0,.2,1)}[data-layout=mahal] .rv.on{clip-path:inset(0)}
+[data-layout=mahal] .frame,[data-layout=mahal] .frame>div{border:0;padding:0}[data-layout=mahal] .dust i{background:var(--gold);box-shadow:none}
+/* rangoli: huge rotating rangoli wheel + confetti */
+[data-layout=rangoli] main{background:none}
+[data-layout=rangoli] .dust::before{content:"";position:fixed;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax;border-radius:50%;background:repeating-conic-gradient(#ff6fb120 0 10deg,#ffe27a20 10deg 20deg,#4ade8020 20deg 30deg,#60a5fa20 30deg 40deg);animation:spin 120s linear infinite}
+[data-layout=rangoli] .dust i:nth-child(3n){background:#ff6fb1}[data-layout=rangoli] .dust i:nth-child(3n+1){background:#4ade80}[data-layout=rangoli] .dust i:nth-child(3n+2){background:#60a5fa}
+[data-layout=rangoli] section{max-width:500px;margin:24px auto;padding:52px 22px;border:3px solid transparent;border-radius:30px;background:linear-gradient(var(--w2),var(--ink)) padding-box,conic-gradient(#ff6fb1,#ffe27a,#4ade80,#60a5fa,#ff6fb1) border-box}
+[data-layout=rangoli] .frame,[data-layout=rangoli] .frame>div{border:0;padding:0}
+/* neon: pulsing glow cards + canvas fireworks (fx.js) */
+[data-layout=neon] section{max-width:500px;margin:26px auto;padding:52px 22px;border:1px solid var(--gold);border-radius:14px;background:#0b1b3a55;animation:glow 3s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 6px #ffd16655,inset 0 0 6px #ffd16622}to{box-shadow:0 0 26px #ffd166aa,inset 0 0 16px #ffd16644}}
+[data-layout=neon] .frame,[data-layout=neon] .frame>div{border:0;padding:0}

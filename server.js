@@ -31,7 +31,7 @@ function page(q, res, g, theme) {
   const T = W.templates.find(t => t.id === theme) || W.templates[0], base = q.protocol + "://" + q.get("host");
   const boot = { code: g?.code || "", rsvp: g?.rsvp || "", count: g?.count || 2, music: music() ? "/" + music() : "", date: W.date };
   res.type("html").send(tpl
-    .replaceAll("{{THEME}}", () => T.id).replaceAll("{{LAYOUT}}", () => T.layout).replaceAll("{{BASE}}", () => base).replaceAll("{{PATH}}", () => esc(q.originalUrl.split("?")[0])).replaceAll("{{GUEST}}", () => esc(g?.name || "आदरणीय परिवार"))
+    .replaceAll("{{THEME}}", () => T.id).replaceAll("{{LAYOUT}}", () => T.layout).replaceAll("{{BL}}", () => T.bl || W.def.bl).replaceAll("{{SH}}", () => T.sh || W.def.sh).replaceAll("{{WISH}}", () => T.wish || W.def.wish).replaceAll("{{BASE}}", () => base).replaceAll("{{PATH}}", () => esc(q.originalUrl.split("?")[0])).replaceAll("{{GUEST}}", () => esc(g?.name || "आदरणीय परिवार"))
     .replaceAll("{{MAP}}", () => W.map).replace("{{BOOT}}", () => JSON.stringify(boot).replace(/</g, "\\u003c")));
 }
 const crawler = /bot|crawl|spider|preview|whatsapp|facebookexternalhit|telegram|slack/i;
