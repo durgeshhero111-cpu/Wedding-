@@ -21,9 +21,15 @@ a{color:#d4af6a}
 <h2>Template</h2><div id="themes"></div>
 <h2>WhatsApp message <small style="opacity:.6">– use {name} and {link}</small></h2>
 <textarea id="msg"></textarea><button class="b" id="saveMsg">Save message</button>
-<h2>Add guests <small style="opacity:.6">– one per line: Name, Mobile, Address</small></h2>
+<h2>Add one guest</h2>
+<div class="grid" style="grid-template-columns:1fr 1fr"><input id="n1" placeholder="Name (e.g. Mama ji)"><input id="m1" placeholder="Mobile (10 digits)" inputmode="tel"></div>
+<input id="a1" placeholder="Address / village (optional)" style="margin-top:8px"><button class="b f" id="add1" style="margin-top:8px">Create link</button>
+<h2>Import many from a file <small style="opacity:.6">– CSV, Excel, PDF, text, or phone contacts (.vcf)</small></h2>
+<input type="file" id="file" accept=".csv,.xlsx,.xls,.txt,.pdf,.vcf" style="padding:8px">
+<div id="prev"></div>
+<h2>Or paste a list <small style="opacity:.6">– one per line: Name, Mobile, Address (you can paste straight from Excel)</small></h2>
 <textarea id="bulk" placeholder="Ramesh Sharma, 9876543210, Patna"></textarea><button class="b f" id="add">Add guests</button>
-<h2>Guests</h2>
+<h2>Guests &amp; their links</h2><input id="q" placeholder="Search name or number" style="margin-bottom:8px">
 <div id="filters"></div>
 <button class="b wa" id="next">Send to next unsent</button><button class="b" id="csv">Download CSV</button>
 <div id="list"></div>
@@ -45,20 +51,59 @@ function render(){const s=D.stats;
   .map(x=>`<div class=c><b>${x[1]}</b>${x[0]}<br><small>${x[2]}&nbsp;</small></div>`).join("");
  $("themes").innerHTML=D.templates.map(t=>`<div class=row><div class=i><b>${E(t.name)}</b></div><button class="b ${t.id===D.theme?"on":""}" data-t="${t.id}">${t.id===D.theme?"Selected":"Use this"}</button><a href="/?theme=${t.id}" target="_blank">Preview</a></div>`).join("");
  $("filters").innerHTML=Object.entries(FILT).map(([k,v])=>`<button class="b ${F===k?"on":""}" data-f="${k}">${v}</button>`).join("");
- const L=D.guests.filter(g=>F==="all"||(F==="unsent"&&!g.sent)||(F==="unseen"&&g.sent&&!g.views)||(F==="noreply"&&g.views&&!g.rsvp)||F===g.rsvp);
- $("list").innerHTML=L.length?L.map(g=>`<div class=row><div class=i><b>${E(g.name)}</b><small>${E(g.mobile)} · ${E(g.address)}</small>
+ const Q=($("q")?.value||"").toLowerCase();const L=D.guests.filter(g=>(!Q||(g.name+g.mobile).toLowerCase().includes(Q))&&(F==="all"||(F==="unsent"&&!g.sent)||(F==="unseen"&&g.sent&&!g.views)||(F==="noreply"&&g.views&&!g.rsvp)||F===g.rsvp));
+ $("list").innerHTML=L.length?L.map(g=>`<div class=row><div class=i><b>${E(g.name)}</b><small>${E(g.mobile)} · ${E(g.address)}</small><small><a href="${link(g)}" target="_blank" style="word-break:break-all">${link(g)}</a></small>
   <span class="tag ${g.sent?"ok":""}">${g.sent?"Sent":"Not sent"}</span><span class=tag>👁 ${g.views}${g.lastView?" · "+new Date(g.lastView).toLocaleString():""}</span>${g.opened?'<span class="tag ok">Opened</span>':""}${g.rsvp?`<span class="tag ${g.rsvp==="yes"?"ok":"no"}">${g.rsvp==="yes"?"Coming ("+g.count+")":"Declined"}</span>`:""}</div>
-  <button class="b wa" data-s="${g._id}">${g.sent?"Resend":"Send"}</button><button class="b" data-c="${g._id}">Copy link</button><button class="b" data-d="${g._id}">✕</button></div>`).join(""):"<p>No guests here yet.</p>";
+  <button class="b wa" data-s="${g._id}">${g.sent?"Resend":"Send"}</button><button class="b" data-c="${g._id}">Copy link</button><button class="b" data-e="${g._id}">Edit</button><button class="b" data-d="${g._id}">✕</button></div>`).join(""):"<p>No guests here yet.</p>";
  $("musicNote").textContent=D.music?"Music: playing public/music file on open.":"No music yet: add public/music.mp4 and redeploy.";
 }
-async function send(id){const g=D.guests.find(x=>x._id===id);window.open(wa(g),"_blank");await api("/api/admin/guests/"+id+"/sent","POST");load()}
+async function send(id){const g=D.guests.find(x=>String(x._id)===String(id));if(!g)return alert("Guest not found – refresh the page");
+ const w=window.open(wa(g),"_blank");if(!w)location.href=wa(g);
+ try{await api("/api/admin/guests/"+id+"/sent","POST");load()}catch(e){}}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){}
+ try{const x=document.createElement("textarea");x.value=t;x.style.cssText="position:fixed;opacity:0";document.body.appendChild(x);x.select();const ok=document.execCommand("copy");x.remove();if(ok)return true}catch(e){}
+ prompt("Copy this link:",t);return false}
 document.addEventListener("click",async e=>{const t=e.target.dataset;if(!t)return;
  if(t.t){await api("/api/admin/settings","POST",{theme:t.t});load()}
  if(t.f){F=t.f;render()}
  if(t.s)send(t.s);
- if(t.c){const g=D.guests.find(x=>x._id===t.c);navigator.clipboard.writeText(link(g));e.target.textContent="Copied"}
+ if(t.c){const g=D.guests.find(x=>String(x._id)===String(t.c));if(!g)return;const b=e.target,ok=await copyText(link(g));if(ok){b.textContent="Copied ✓";setTimeout(()=>b.textContent="Copy link",1500)}}
+ if(t.e){const g=D.guests.find(x=>String(x._id)==String(t.e));const n=prompt("Name",g.name);if(n===null)return;const m=prompt("Mobile",g.mobile);if(m===null)return;const ad=prompt("Address",g.address||"");if(ad===null)return;
+  try{await api("/api/admin/guests/"+t.e,"PUT",{name:n,mobile:m,address:ad});load()}catch(x){alert("Name and a 10-digit mobile are required")}}
  if(t.d&&confirm("Delete this guest?")){await api("/api/admin/guests/"+t.d,"DELETE");load()}});
-$("add").onclick=async()=>{const r=await api("/api/admin/guests","POST",{text:$("bulk").value});$("bulk").value="";alert(r.added+" guests added");load()};
+const say=r=>alert(r.added+" guest(s) added"+(r.skipped?", "+r.skipped+" skipped (already in the list)":"")+(r.added?"\nTheir personal links are in the list below.":"\nNothing added – check name and 10-digit mobile."));
+$("add").onclick=async()=>{const r=await api("/api/admin/guests","POST",{text:$("bulk").value});$("bulk").value="";say(r);load()};
+$("add1").onclick=async()=>{const r=await api("/api/admin/guests","POST",{text:[$("n1").value.replace(/[,|]/g," "),$("m1").value,$("a1").value].join(", ")});if(r.added){$("n1").value=$("m1").value=$("a1").value=""}say(r);load()};
+$("q").oninput=render;
+// ----- file import -----
+const loadJS=u=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+const phoneRe=/(\+?\d[\d\s-]{8,}\d)/;
+function rowsToGuests(rows){rows=rows.map(r=>r.map(c=>String(c??"").trim())).filter(r=>r.some(Boolean));if(!rows.length)return[];
+ let ni=-1,mi=-1,ai=-1;const h=rows[0].map(x=>x.toLowerCase());
+ if(h.some(x=>/name|नाम|mobile|phone|number|मोबाइल/.test(x))&&!h.some(x=>phoneRe.test(x))){ni=h.findIndex(x=>/name|नाम/.test(x));mi=h.findIndex(x=>/mobile|phone|number|contact|मोबाइल|फोन/.test(x));ai=h.findIndex(x=>/address|village|city|पता|गाँव|गांव/.test(x));rows.shift()}
+ return rows.map(r=>{let m=mi>=0?r[mi]:r.find(c=>phoneRe.test(c)&&c.replace(/\D/g,"").length>=10)||"";
+  const name=ni>=0?r[ni]:r.find((c,i)=>c&&c!==m&&!/^[\d\s+-]+$/.test(c))||"";
+  const addr=ai>=0?r[ai]:r.filter(c=>c&&c!==m&&c!==name).join(", ");return{name:name.replace(/[,|]/g," ").trim(),mobile:m,addr}}).filter(g=>g.name&&g.mobile.replace(/\D/g,"").length>=10)}
+function linesToRows(text){return text.split(/\r?\n/).map(l=>{l=l.trim();if(!l)return null;const p=l.split(/[,\t|;]/).map(x=>x.trim());if(p.length>1)return p;
+ const m=l.match(phoneRe);return m?[l.slice(0,m.index).trim(),m[1],l.slice(m.index+m[1].length).trim()]:[l]}).filter(Boolean)}
+function parseCSV(t){const rows=[];let r=[],c="",q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'&&t[i+1]=='"'){c+='"';i++}else if(ch=='"')q=false;else c+=ch}else if(ch=='"')q=true;else if(ch==","||ch=="\t"||ch==";"){r.push(c);c=""}else if(ch=="\n"){r.push(c);rows.push(r);r=[];c=""}else if(ch!="\r")c+=ch}r.push(c);rows.push(r);return rows}
+function parseVCF(t){const out=[];t.split(/BEGIN:VCARD/i).slice(1).forEach(v=>{const n=(v.match(/^FN[^:]*:(.*)$/mi)||[])[1];const tel=(v.match(/^TEL[^:]*:(.*)$/mi)||[])[1];if(n&&tel)out.push([n.trim(),tel.trim(),""])});return out}
+let PEND=[];
+$("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;$("prev").innerHTML="<p>Reading "+E(f.name)+"…</p>";const ext=f.name.split(".").pop().toLowerCase();let rows=[];
+ try{
+  if(ext=="csv"||ext=="txt")rows=ext=="csv"?parseCSV(await f.text()):linesToRows(await f.text());
+  else if(ext=="vcf")rows=parseVCF(await f.text());
+  else if(ext=="xlsx"||ext=="xls"){await loadJS("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");const wb=XLSX.read(await f.arrayBuffer());rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false})}
+  else if(ext=="pdf"){await loadJS("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+   const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let txt="";
+   for(let p=1;p<=pdf.numPages;p++){const items=(await(await pdf.getPage(p)).getTextContent()).items,ys={};items.forEach(it=>{const y=Math.round(it.transform[5]/3);(ys[y]=ys[y]||[]).push(it)});
+    Object.keys(ys).sort((a,b)=>b-a).forEach(y=>{txt+=ys[y].sort((a,b)=>a.transform[4]-b.transform[4]).map(i=>i.str).join(" ").replace(/\s{2,}/g,", ")+"\n"})}
+   rows=linesToRows(txt)}
+  else throw 0}catch(x){$("prev").innerHTML="<p>Could not read this file. Try CSV or Excel.</p>";return}
+ PEND=rowsToGuests(rows);
+ $("prev").innerHTML=PEND.length?`<p><b>${PEND.length}</b> guests found. Check the first few:</p>`+PEND.slice(0,8).map(g=>`<div class=row><div class=i><b>${E(g.name)}</b><small>${E(g.mobile)} · ${E(g.addr)}</small></div></div>`).join("")+(PEND.length>8?`<p style="opacity:.6">…and ${PEND.length-8} more</p>`:"")+`<button class="b f" id="imp">Import ${PEND.length} guests</button>`
+  :"<p>No names with 10-digit mobile numbers found. Each row needs a name and a mobile number.</p>"};
+document.addEventListener("click",async e=>{if(e.target.id=="imp"){const r=await api("/api/admin/guests","POST",{text:PEND.map(g=>[g.name,g.mobile,g.addr].join(", ")).join("\n")});$("prev").innerHTML="";$("file").value="";say(r);load()}});
 $("saveMsg").onclick=async()=>{await api("/api/admin/settings","POST",{msg:$("msg").value});alert("Message saved")};
 $("next").onclick=()=>{const g=D.guests.slice().reverse().find(x=>!x.sent);g?send(g._id):alert("Everyone has been sent a card")};
 $("csv").onclick=()=>{const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
