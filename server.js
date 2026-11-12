@@ -1,19 +1,22 @@
 require("express-async-errors");
-const express = require("express"), mongoose = require("mongoose"), crypto = require("crypto"),
+const express = require("express"), { Pool } = require("pg"), crypto = require("crypto"),
   fs = require("fs"), path = require("path"), W = require("./wedding");
-const { MONGODB_URI, ADMIN_PASSWORD, PORT = 3000 } = process.env;
-if (!MONGODB_URI || !ADMIN_PASSWORD) { console.error("Set MONGODB_URI and ADMIN_PASSWORD"); process.exit(1); }
+const { DATABASE_URL, ADMIN_PASSWORD, PORT = 3000 } = process.env;
+if (!DATABASE_URL || !ADMIN_PASSWORD) { console.error("Set DATABASE_URL and ADMIN_PASSWORD"); process.exit(1); }
 const SECRET = process.env.SECRET || ADMIN_PASSWORD;
 const app = express(); app.set("trust proxy", 1); app.use(express.json({ limit: "1mb" }));
 
-const Guest = mongoose.model("Guest", new mongoose.Schema({
-  name: String, mobile: String, address: String, code: { type: String, unique: true },
-  sent: Boolean, sentAt: Date, views: { type: Number, default: 0 }, firstView: Date, lastView: Date,
-  opened: Boolean, rsvp: { type: String, default: "" }, count: { type: Number, default: 0 }, rsvpAt: Date,
-}, { timestamps: true }));
-const Setting = mongoose.model("Setting", new mongoose.Schema({ _id: String, value: String }));
-const get = async (k, d) => (await Setting.findById(k))?.value ?? d;
-const put = (k, v) => Setting.findByIdAndUpdate(k, { value: v }, { upsert: true });
+const pool = new Pool({ connectionString: DATABASE_URL, ssl: /render\.com/.test(DATABASE_URL) ? { rejectUnauthorized: false } : false });
+const q1 = async (sql, p) => (await pool.query(sql, p)).rows;
+const GUEST = `id AS "_id", name, mobile, address, code, sent, sent_at AS "sentAt", views, first_view AS "firstView", last_view AS "lastView", opened, rsvp, count, rsvp_at AS "rsvpAt", created_at AS "createdAt"`;
+const get = async (k, d) => (await q1("SELECT value FROM settings WHERE key=$1", [k]))[0]?.value ?? d;
+const put = (k, v) => q1("INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2", [k, v]);
+async function init() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS guests(id SERIAL PRIMARY KEY, name TEXT NOT NULL, mobile TEXT NOT NULL, address TEXT DEFAULT '', code TEXT UNIQUE NOT NULL,
+    sent BOOLEAN DEFAULT false, sent_at TIMESTAMPTZ, views INT DEFAULT 0, first_view TIMESTAMPTZ, last_view TIMESTAMPTZ, opened BOOLEAN DEFAULT false,
+    rsvp TEXT DEFAULT '', count INT DEFAULT 0, rsvp_at TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT now());
+    CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);`);
+}
 
 const tok = () => crypto.createHmac("sha256", SECRET).update("admin").digest("hex");
 const cookie = q => Object.fromEntries((q.headers.cookie || "").split(/;\s*/).map(c => c.split("=")));
@@ -35,21 +38,20 @@ const crawler = /bot|crawl|spider|preview|whatsapp|facebookexternalhit|telegram|
 app.get("/health", (q, s) => s.send("ok"));
 app.get("/", async (q, s) => page(q, s, null, W.themes.includes(q.query.theme) ? q.query.theme : await get("theme", W.theme)));
 app.get("/i/:code", async (q, s) => {
-  const g = await Guest.findOne({ code: q.params.code });
+  const g = (await q1(`SELECT ${GUEST} FROM guests WHERE code=$1`, [q.params.code]))[0];
   if (!g) return s.status(404).send("Invitation not found");
   if (!crawler.test(q.get("user-agent") || "") && !isAdmin(q)) { // don't count WhatsApp previews or the admin
-    const set = { lastView: new Date() }; if (!g.firstView) set.firstView = set.lastView;
-    await Guest.updateOne({ _id: g._id }, { $inc: { views: 1 }, $set: set });
+    await q1("UPDATE guests SET views=views+1, last_view=now(), first_view=COALESCE(first_view, now()) WHERE id=$1", [g._id]);
   }
   page(q, s, g, await get("theme", W.theme));
 });
 app.post("/api/open/:code", async (q, s) => {
-  if (!isAdmin(q)) await Guest.updateOne({ code: q.params.code }, { $set: { opened: true } });
+  if (!isAdmin(q)) await q1("UPDATE guests SET opened=true WHERE code=$1", [q.params.code]);
   s.json({ ok: 1 });
 });
 app.post("/api/rsvp/:code", async (q, s) => {
   const r = q.body.rsvp; if (!["yes", "no"].includes(r)) return s.sendStatus(400);
-  await Guest.updateOne({ code: q.params.code }, { $set: { rsvp: r, count: r === "yes" ? Math.min(Math.max(+q.body.count || 1, 1), 20) : 0, rsvpAt: new Date() } });
+  await q1("UPDATE guests SET rsvp=$1, count=$2, rsvp_at=now() WHERE code=$3", [r, r === "yes" ? Math.min(Math.max(+q.body.count || 1, 1), 20) : 0, q.params.code]);
   s.json({ ok: 1 });
 });
 
@@ -64,7 +66,7 @@ app.post("/admin/login", (q, s) => {
 app.get("/admin", (q, s) => s.sendFile(path.join(__dirname, "views/admin.html")));
 app.use("/api/admin", auth);
 app.get("/api/admin/data", async (q, s) => {
-  const guests = await Guest.find().sort({ createdAt: -1 }).lean(), n = f => guests.filter(f).length;
+  const guests = await q1(`SELECT ${GUEST} FROM guests ORDER BY created_at DESC, id DESC`), n = f => guests.filter(f).length;
   s.json({ guests, themes: W.themes, templates: W.templates, theme: await get("theme", W.theme), msg: await get("msg", W.msg), music: !!music(),
     stats: { total: guests.length, sent: n(g => g.sent), seen: n(g => g.views > 0), opened: n(g => g.opened),
       yes: n(g => g.rsvp === "yes"), no: n(g => g.rsvp === "no"), pending: n(g => !g.rsvp),
@@ -79,11 +81,11 @@ app.post("/api/admin/guests", async (q, s) => { // lines: Name, Mobile, Address
     if (mobile.length === 10) mobile = "91" + mobile;
     docs.push({ name, mobile, address: a.join(", "), code: crypto.randomBytes(5).toString("hex") });
   });
-  if (docs.length) await Guest.insertMany(docs);
+  for (const d of docs) await q1("INSERT INTO guests(name,mobile,address,code) VALUES($1,$2,$3,$4)", [d.name, d.mobile, d.address, d.code]);
   s.json({ added: docs.length });
 });
-app.post("/api/admin/guests/:id/sent", async (q, s) => { await Guest.findByIdAndUpdate(q.params.id, { sent: true, sentAt: new Date() }); s.json({ ok: 1 }); });
-app.delete("/api/admin/guests/:id", async (q, s) => { await Guest.findByIdAndDelete(q.params.id); s.json({ ok: 1 }); });
+app.post("/api/admin/guests/:id/sent", async (q, s) => { await q1("UPDATE guests SET sent=true, sent_at=now() WHERE id=$1", [+q.params.id]); s.json({ ok: 1 }); });
+app.delete("/api/admin/guests/:id", async (q, s) => { await q1("DELETE FROM guests WHERE id=$1", [+q.params.id]); s.json({ ok: 1 }); });
 app.post("/api/admin/settings", async (q, s) => {
   if (W.themes.includes(q.body.theme)) await put("theme", q.body.theme);
   if (q.body.msg) await put("msg", q.body.msg);
@@ -92,4 +94,4 @@ app.post("/api/admin/settings", async (q, s) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use((e, q, s, n) => { console.error(e); s.status(500).json({ error: "server" }); });
-mongoose.connect(MONGODB_URI).then(() => app.listen(PORT, () => console.log("Running on " + PORT)));
+init().then(() => app.listen(PORT, () => console.log("Running on " + PORT))).catch(e => { console.error("Database error:", e.message); process.exit(1); });
